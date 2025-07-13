@@ -1,103 +1,113 @@
-import Image from "next/image";
+// app/page.tsx
+'use client' // Diretiva necessária para usar hooks como useState e useEffect
 
-export default function Home() {
+import { useState, useEffect } from 'react'
+import Image from 'next/image' // Componente de imagem otimizado do Next.js
+import TimeBox from '@/components/TimeBox'
+import { IoHeartOutline } from 'react-icons/io5'; // Um ícone simples e genérico para substituir o cacto
+
+// Imagens para a galeria
+const images = ['/img/couple1.jpg', '/img/couple2.jpg']
+
+// Data-alvo: 28 SET 2025 00:00 (BRT, -03:00)
+const targetDate = new Date('2025-09-28T00:00:00-03:00').getTime()
+
+export default function HomePage() {
+  const [counter, setCounter] = useState([
+    { label: 'dias', value: '00' },
+    { label: 'horas', value: '00' },
+    { label: 'min', value: '00' },
+    { label: 'seg', value: '00' },
+  ])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const diff = targetDate - Date.now()
+
+      if (diff <= 0) {
+        clearInterval(timer)
+        setCounter([
+            { label: 'dias', value: '00' },
+            { label: 'horas', value: '00' },
+            { label: 'min', value: '00' },
+            { label: 'seg', value: '00' },
+        ]);
+        return
+      }
+
+      const days = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0')
+      const hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0')
+      const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0')
+      const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0')
+
+      setCounter([
+        { label: 'dias', value: days },
+        { label: 'horas', value: hours },
+        { label: 'min', value: minutes },
+        { label: 'seg', value: seconds },
+      ])
+    }, 1000)
+
+    // Limpa o intervalo quando o componente é desmontado
+    return () => clearInterval(timer)
+  }, [])
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="flex min-h-screen flex-col items-center bg-black font-inter text-white overflow-x-hidden">
+      <header className="w-full text-center pt-10 pb-4 animate__animated animate__fadeInDown">
+        <h1 className="font-great text-5xl md:text-7xl leading-tight">
+          Flávio Sólon <span className="mx-2">💍</span> Brenda Raica
+        </h1>
+        {/* Frase do amor aumentada e com texto mais completo */}
+        <p className="mt-2 text-lg tracking-wide opacity-90 md:text-xl md:mt-3">
+          🌵 Nosso amor floresce e nos guia em cada passo. 🌵
+        </p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Galeria de imagens centralizada e otimizada para mobile */}
+      <section className="flex w-full justify-center px-4 overflow-hidden"> {/* Removido overflow-x-auto e snap */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-4 max-w-screen-lg"> {/* Contêiner flexível para as imagens */}
+          {images.map((src, i) => (
+            <div key={i} className="w-full flex-shrink-0 flex justify-center"> {/* Garante que cada imagem seja um item flexível e centralizada */}
+              <Image
+                src={src}
+                alt="Casal feliz"
+                // Ajuste para priorizar mobile: usar 'fill' e um contêiner com tamanho fixo para manter a proporção
+                // Ou usar width/height fixos para controle mais rígido, com ajuste de 'object-cover'
+                width={320} // Tamanho um pouco maior para mobile, ajustando para caber na tela
+                height={427} // Proporcional a 320 (ex: 320 * 4/3)
+                className="rounded-2xl shadow-xl object-cover" // object-cover para preencher o espaço
+              />
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      <section className="mt-6 flex flex-col items-center gap-6 md:mt-8"> {/* Aumento do espaçamento superior */}
+        <div className="flex gap-3 md:gap-5"> {/* Aumento do espaçamento entre as caixas de tempo */}
+          {counter.map((unit) => (
+            <TimeBox
+              key={unit.label}
+              value={unit.value}
+              label={unit.label}
+            />
+          ))}
+        </div>
+
+        {/* Animação mais sutil para a frase "Coisa boa não se compartilha" */}
+        <p className="animate__animated animate__fadeIn animate__slower animate__infinite text-center font-semibold italic text-xl md:text-2xl opacity-90">
+          “Coisa boa não se compartilha”
+        </p>
+
+        <div className="animate__animated animate__fadeInUp animate__slower animate__infinite alternate flex gap-2 text-3xl md:text-4xl"> {/* Ícone mais simples e maior */}
+          {/* Gera 5 ícones de coração */}
+          {[...Array(5)].map((_, i) => <IoHeartOutline key={i} className="text-primary" />)} {/* Cor primária para o coração */}
+        </div>
+      </section>
+
+      <footer className="mt-auto py-6 text-sm opacity-70"> {/* Aumento do padding e opacidade */}
+        Feito com ❤️
       </footer>
-    </div>
-  );
+    </main>
+  )
 }
